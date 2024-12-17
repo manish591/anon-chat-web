@@ -1,18 +1,67 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Lock, Send } from 'lucide-react';
 import Image from 'next/image';
+import { v4 as uuidv4 } from 'uuid';
+import { useParams } from 'next/navigation';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 export default function AnonymousMessages() {
-  const [message, setMessage] = useState('');
-  const [count, setCount] = useState(483);
+  const useridRef = useRef<string | null>(null);
+  const [message, setMessage] = useState<string>('');
+  const [username, setUsername] = useState('');
+  const params = useParams();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  console.log(API_URL);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage('');
-    // Handle message submission here
+
+    try {
+      const res = await fetch(`${API_URL}/users/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: (params.userid as string) ?? '',
+          senderId: useridRef.current ?? '',
+          text: message,
+        }),
+      });
+
+      const messageData = await res.json();
+
+      console.log(messageData);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e: unknown) {
+      console.log('Error occured');
+    }
   };
+
+  useEffect(() => {
+    const userid = localStorage.getItem('userid');
+
+    if (!userid) {
+      localStorage.setItem('userid', uuidv4());
+    }
+
+    useridRef.current = localStorage.getItem('userid');
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/users/${params.userid}`);
+        const data = await res.json();
+
+        setUsername(data.data.username);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err: unknown) {}
+    })();
+  }, [params.userid, username]);
 
   return (
     <div className="min-h-screen bg-[#FFF5F0] p-6 flex flex-col items-center">
@@ -31,7 +80,7 @@ export default function AnonymousMessages() {
               />
             </div>
             <div>
-              <h2 className="font-bold">@jj</h2>
+              <h2 className="font-bold">@{username}</h2>
               <p className="text-sm">send me anonymous messages!</p>
             </div>
           </div>
@@ -66,15 +115,12 @@ export default function AnonymousMessages() {
       {/* Counter */}
       <div className="mt-12 text-black text-center">
         <p className="text-xl font-bold">
-          👉 {count} people just tapped the button 👈
+          👉 589 people just tapped the button 👈
         </p>
       </div>
 
       {/* Get Started Button */}
-      <button
-        onClick={() => setCount((prev) => prev + 1)}
-        className="mt-8 w-full max-w-md px-6 py-4 bg-black text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-colors"
-      >
+      <button className="mt-8 w-full max-w-md px-6 py-4 bg-black text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-colors">
         Get your own messages!
       </button>
     </div>
