@@ -14,7 +14,7 @@ export default function AnonymousMessages() {
   const [username, setUsername] = useState('');
   const params = useParams();
 
-  console.log(API_URL);
+  console.log(process.env);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
