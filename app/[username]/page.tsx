@@ -17,13 +17,13 @@ export default function AnonymousMessages() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${API_URL}/users/messages`, {
+      const res = await fetch(`${API_URL}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: (params.userid as string) ?? '',
+          username: (params.username as string) ?? '',
           senderId: useridRef.current ?? '',
           text: message,
         }),
@@ -63,7 +63,7 @@ export default function AnonymousMessages() {
               />
             </div>
             <div>
-              <h2 className="font-bold">@{params.userid}</h2>
+              <h2 className="font-bold">@{params.username}</h2>
               <p className="text-sm">send me anonymous messages!</p>
             </div>
           </div>
